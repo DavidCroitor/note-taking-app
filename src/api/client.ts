@@ -63,6 +63,22 @@ export async function pingServer(): Promise<void> {
     console.log("Server wake-up ping failed (expected if idling):", err);
   }
 }
+export async function waitForServer(maxRetries = 10): Promise<void> {
+  let retries = 0;
+  while (retries < maxRetries) {
+    try {
+      await apiFetch("/healthz", { method: "GET" }, 5000);
+      console.log("Server is healthy!");
+      return; // Success!
+    } catch (err) {
+      retries++;
+      console.log(`Server not ready (attempt ${retries}/${maxRetries})...`);
+      // Wait 2 seconds before trying again
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+  }
+  throw new Error("Server failed to wake up in time.");
+}
 
 export function friendlyError(
   err: unknown,

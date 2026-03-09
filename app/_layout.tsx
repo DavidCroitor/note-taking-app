@@ -1,14 +1,54 @@
 import { initKeepalive } from "@/src/api/keepAlive";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
-import { pingServer } from "../src/api/client";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { pingServer, waitForServer } from "../src/api/client";
+import { Button } from "../src/components/ui";
 import { theme } from "../src/constants/theme";
 
 export default function RootLayout() {
-  useEffect(() => {
-    return initKeepalive(pingServer);
+  const [isServerReady, setIsServerReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initApp = useCallback(() => {
+    setError(null);
+    setIsServerReady(false);
+
+    waitForServer()
+      .then(() => setIsServerReady(true))
+      .catch((err) => {
+        setError(
+          "Could not wake up the server. Check your internet or backend status.",
+        );
+        console.error(err);
+      });
   }, []);
+
+  useEffect(() => {
+    initApp();
+    return initKeepalive(pingServer);
+  }, [initApp]);
+
+  if (!isServerReady && !error) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
+        <Text style={styles.statusText}>Waking up your server...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorEmoji}>🔌</Text>
+        <Text style={styles.errorTitle}>Server Offline</Text>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button label="Try Again" onPress={initApp} style={{ marginTop: 20 }} />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -60,3 +100,29 @@ export default function RootLayout() {
     </>
   );
 }
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.bg,
+    padding: 40,
+  },
+  statusText: {
+    marginTop: 10,
+    color: theme.colors.inkMuted,
+    fontFamily: theme.fonts.serif,
+  },
+  errorEmoji: { fontSize: 40, marginBottom: 10 },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: theme.colors.ink,
+    marginBottom: 8,
+  },
+  errorText: {
+    textAlign: "center",
+    color: theme.colors.inkMuted,
+    lineHeight: 20,
+  },
+});
