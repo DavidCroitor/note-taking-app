@@ -11,13 +11,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { friendlyError } from "../src/api/client";
 import type { DriveFolder } from "../src/api/folders";
 import { compressAll, CompressedImage } from "../src/api/images";
-import { createNoteFromImages } from "../src/api/notes";
 import { Button, ErrorBanner, SectionLabel } from "../src/components/ui";
 import { theme } from "../src/constants/theme";
 import { capturedPhotoRef } from "./camera";
@@ -134,11 +133,19 @@ export default function CreateScreen() {
       setCompressing(false);
       setLoading(true);
 
-      const result = await createNoteFromImages(
-        compressed,
-        trimmedTitle,
-        folder?.id,
-      );
+      await new Promise((resolve) => setTimeout(resolve, 6000)); // Artificial delay for better UX
+
+      // const result = await createNoteFromImages(
+      //   compressed,
+      //   trimmedTitle,
+      //   folder?.id,
+      // );
+
+      const result = {
+        file_id: "mock-id-" + Date.now(),
+        images_processed: images.length,
+        markdown_preview: "# Mocked Note\nThis is a local test.",
+      };
 
       router.replace({
         pathname: "/success",
@@ -191,7 +198,7 @@ export default function CreateScreen() {
                 setTitle(t);
                 clearError();
               }}
-              placeholder="My lecture notes..."
+              placeholder="Random thoughts..."
               placeholderTextColor={theme.colors.inkFaint}
               maxLength={120}
               returnKeyType="done"

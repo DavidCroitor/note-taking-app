@@ -51,10 +51,13 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={isPrimary ? theme.colors.surface : theme.colors.accent}
-        />
+        <View style={styles.btnLoading}>
+          <ActivityIndicator
+            size="small"
+            color={isPrimary ? theme.colors.surface : theme.colors.accent}
+          />
+          <Text>{label}</Text>
+        </View>
       ) : (
         <Text
           style={[
@@ -154,6 +157,13 @@ const styles = StyleSheet.create({
   },
   btnTextDanger: {
     color: theme.colors.error,
+  },
+  btnLoading: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    fontWeight: "300",
+    fontSize: theme.text.sm,
   },
   errorBanner: {
     backgroundColor: theme.colors.errorLight,

@@ -45,7 +45,7 @@ export default function HomeScreen() {
           <Text style={styles.ctaArrow}>→</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footer}>Powered by your own server</Text>
+        <Text style={styles.footer}></Text>
       </View>
     </SafeAreaView>
   );
