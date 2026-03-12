@@ -1,3 +1,4 @@
+import { createNoteFromImages } from "@/src/api/notes";
 import { getLastFolder } from "@/src/api/storage";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -133,19 +134,11 @@ export default function CreateScreen() {
       setCompressing(false);
       setLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 6000)); // Artificial delay for better UX
-
-      // const result = await createNoteFromImages(
-      //   compressed,
-      //   trimmedTitle,
-      //   folder?.id,
-      // );
-
-      const result = {
-        file_id: "mock-id-" + Date.now(),
-        images_processed: images.length,
-        markdown_preview: "# Mocked Note\nThis is a local test.",
-      };
+      const result = await createNoteFromImages(
+        compressed,
+        trimmedTitle,
+        folder?.id,
+      );
 
       router.replace({
         pathname: "/success",

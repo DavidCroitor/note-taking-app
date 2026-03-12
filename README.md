@@ -1,50 +1,106 @@
-# Welcome to your Expo app 👋
+# Note-Taking App (Mobile)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, React Native mobile application built with Expo that transforms photos of handwritten notes into structured Markdown using an AI-powered backend.
 
-## Get started
+---
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **AI Transcription**: Converts images (JPEG, PNG, WebP) of handwriting into clean, structured Markdown.
+- **Camera Integration**: Capture notes directly within the app using a custom camera interface.
+- **Folder Management**: Organize your notes into folders with a dedicated folder picker (Google Drive integration via backend).
+- **Server Health Check**: Automated "Keep-Alive" system to ensure the backend is responsive before performing operations.
+- **Themed UI**: A consistent, elegant design system with support for custom fonts and haptic feedback.
+- **Cross-Platform**: Built with Expo and React Native, supporting iOS and Android.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Authentication
 
-In the output, you'll find options to open the app in a
+All requests to the backend require an API key passed as a header:
+X-API-Key: your_secret_key
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Make sure to set `EXPO_PUBLIC_API_KEY` in your `.env` file. This value is used automatically for all requests.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+| Layer          | Technology Used                                                        |
+| -------------- | ---------------------------------------------------------------------- |
+| Framework      | [Expo](https://expo.dev/) (SDK 55) & React Native                      |
+| Navigation     | [Expo Router](https://docs.expo.dev/router/introduction/) (File-based) |
+| UI & Animation | Reanimated, Expo Haptics, Expo Symbols                                 |
+| Hardware       | Expo Camera, Expo Image Picker                                         |
+| Language       | TypeScript                                                             |
 
-```bash
-npm run reset-project
+---
+
+## Project Structure
+
+```text
+├── app/                  # Expo Router file-based navigation
+│   ├── _layout.tsx       # Root layout with status bar and navigation themes
+│   ├── index.tsx         # Dashboard/Notes list view
+│   ├── camera.tsx        # Custom camera UI for note capture
+│   ├── create.tsx        # Note creation and AI processing flow
+│   ├── folder-picker.tsx # Modal for organizing notes into folders
+│   └── success.tsx       # Post-upload confirmation screen
+├── src/
+│   ├── api/              # API client and service definitions
+│   │   ├── client.ts     # Core fetch wrapper and server health checks
+│   │   ├── notes.ts      # Note creation and OCR endpoints
+│   │   └── keepAlive.ts  # Background pinging logic
+│   ├── components/       # Shared UI primitives (Button, Card, etc.)
+│   └── constants/        # Theme definitions (colors, typography, spacing)
+└── assets/               # Static assets (images, fonts)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Setup & Installation
 
-To learn more about developing your project with Expo, look at the following resources:
+### 1. Prerequisites
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Node.js (v18 or newer)
+- Expo Go app on your mobile device (for development)
+- A running [Note-Taking Server](https://github.com/DavidCroitor/note-taking-server)
 
-## Join the community
+### 2. Installation
 
-Join our community of developers creating universal apps.
+```bash
+git clone <this-repository-url>
+cd note-taking-app
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 3. Configuration
+
+Create a `.env` file in the root directory or set environment variables:
+
+| Variable             | Required | Description                                                  |
+| -------------------- | -------- | ------------------------------------------------------------ |
+| EXPO_PUBLIC_BASE_URL | YES      | The URL of your AI OCR backend (e.g., http://localhost:8000) |
+| EXPO_PUBLIC_API_KEY  | YES      | API Key to authorize requests to the backend                 |
+
+### 4. Running the App
+
+```bash
+npx expo start
+```
+
+Scan the QR code with your phone or press `i` for iOS simulator / `a` for Android emulator.
+
+---
+
+## Backend Connectivity
+
+The app includes a built-in `waitForServer` mechanism in [src/api/client.ts](src/api/client.ts). If your backend is hosted on a platform that scales to zero (like Render), the app will automatically display a "Waking up server" screen while it prepares the environment.
+
+---
+
+## Example
+
+![Photo 1 | 200](/assets/images/Photo1.jpg)
+![Photo 2 | 200](/assets/images/Photo2.jpg)
+![Photo 3 | 200](/assets/images/Photo3.jpg)
