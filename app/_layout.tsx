@@ -21,7 +21,6 @@ export default function RootLayout() {
         setError(
           "Could not wake up the server. Check your internet or backend status.",
         );
-        console.error(err);
       });
   }, []);
 
@@ -78,14 +77,6 @@ export default function RootLayout() {
             title: "Choose Folder",
             presentation: "modal",
             headerBackTitle: "Cancel",
-          }}
-        />
-        <Stack.Screen
-          name="camera"
-          options={{
-            title: "",
-            presentation: "fullScreenModal",
-            headerShown: false,
           }}
         />
         <Stack.Screen

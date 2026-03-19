@@ -12,6 +12,7 @@ A modern, React Native mobile application built with Expo that transforms photos
 - **Server Health Check**: Automated "Keep-Alive" system to ensure the backend is responsive before performing operations.
 - **Themed UI**: A consistent, elegant design system with support for custom fonts and haptic feedback.
 - **Cross-Platform**: Built with Expo and React Native, supporting iOS and Android.
+- **Image-Croper**: Supports Image Croping
 
 ---
 
@@ -96,6 +97,14 @@ Scan the QR code with your phone or press `i` for iOS simulator / `a` for Androi
 ## Backend Connectivity
 
 The app includes a built-in `waitForServer` mechanism in [src/api/client.ts](src/api/client.ts). If your backend is hosted on a platform that scales to zero (like Render), the app will automatically display a "Waking up server" screen while it prepares the environment.
+
+---
+
+## Future Work
+
+- **Multiple User Support**: Add functionality to allow multiple user to login.
+- **Google Authentication**: Allow users to connect using personal Google Accounts.
+- **Notes retrieval**: Allow users to retrieve saved notes, not only from Google Drive
 
 ---
 
