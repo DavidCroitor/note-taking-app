@@ -27,11 +27,7 @@ export async function createNoteFromImages(
       type: image.mimeType,
     } as unknown as Blob);
   }
-
-  form.append(
-    "filename",
-    filename.endsWith(".md") ? filename : `${filename}.md`,
-  );
+  form.append("filename", filename);
   if (folderId) form.append("folder_id", folderId);
 
   return apiFetch<CreateNoteResponse>(

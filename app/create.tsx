@@ -1,8 +1,6 @@
-import { createNoteFromImages } from "@/src/api/notes";
-import { getLastFolder } from "@/src/api/storage";
-import * as ImagePicker from "expo-image-picker";
-import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { MAX_IMAGES } from "@/src/constants/config";
+import { useCreateNote } from "@/src/hooks/useCreateNote";
+import React from "react";
 import {
   Image,
   KeyboardAvoidingView,
@@ -15,149 +13,28 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { friendlyError } from "../src/api/client";
-import type { DriveFolder } from "../src/api/folders";
-import { compressAll, CompressedImage } from "../src/api/images";
 import { Button, ErrorBanner, SectionLabel } from "../src/components/ui";
 import { theme } from "../src/constants/theme";
-import { capturedPhotoRef } from "./camera";
-import { selectedFolderRef } from "./folder-picker";
-
-const MAX_IMAGES = 15;
-
-interface SelectedImage {
-  originalUri: string;
-  filename: string;
-}
 
 export default function CreateScreen() {
-  const router = useRouter();
-
-  const [title, setTitle] = useState("");
-  const [images, setImages] = useState<SelectedImage[]>([]);
-  const [folder, setFolder] = useState<DriveFolder | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [compressing, setCompressing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const clearError = () => setError(null);
-
-  useEffect(() => {
-    getLastFolder().then((savedFolder) => {
-      if (savedFolder && !folder) {
-        setFolder(savedFolder);
-      }
-    });
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (selectedFolderRef.folder !== null) {
-        if (selectedFolderRef.folder.id === "") {
-          setFolder(null);
-        } else {
-          setFolder(selectedFolderRef.folder);
-        }
-        selectedFolderRef.folder = null;
-      }
-      if (capturedPhotoRef.uri !== null) {
-        const uri = capturedPhotoRef.uri;
-        capturedPhotoRef.uri = null;
-        setImages((prev) =>
-          [
-            ...prev,
-            { originalUri: uri, filename: `photo_${Date.now()}.jpg` },
-          ].slice(0, MAX_IMAGES),
-        );
-        clearError();
-      }
-    }, []),
-  );
-
-  const remaining = MAX_IMAGES - images.length;
-
-  // ─── Image picking ────────────────────────────────────────────────────────
-
-  const pickFromLibrary = useCallback(async () => {
-    if (remaining <= 0) {
-      setError(`Maximum ${MAX_IMAGES} images per note.`);
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsMultipleSelection: true,
-      selectionLimit: remaining,
-      quality: 1,
-    });
-    if (!result.canceled) {
-      const added: SelectedImage[] = result.assets.map((a, i) => ({
-        originalUri: a.uri,
-        filename: a.fileName ?? `photo_${Date.now()}_${i}.jpg`,
-      }));
-      setImages((prev) => [...prev, ...added].slice(0, MAX_IMAGES));
-      clearError();
-    }
-  }, [remaining]);
-
-  const takePhoto = useCallback(async () => {
-    if (remaining <= 0) {
-      setError(`Maximum ${MAX_IMAGES} images per note.`);
-      return;
-    }
-    router.push("/camera");
-  }, [remaining, router]);
-
-  const removeImage = useCallback((index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // ─── Submit ───────────────────────────────────────────────────────────────
-
-  const handleSubmit = useCallback(async () => {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      setError("Please enter a title for your note.");
-      return;
-    }
-    if (images.length === 0) {
-      setError("Add at least one photo of your note.");
-      return;
-    }
-
-    setError(null);
-
-    try {
-      setCompressing(true);
-      const compressed: CompressedImage[] = await compressAll(
-        images.map((img) => ({ uri: img.originalUri, filename: img.filename })),
-      );
-      setCompressing(false);
-      setLoading(true);
-
-      const result = await createNoteFromImages(
-        compressed,
-        trimmedTitle,
-        folder?.id,
-      );
-
-      router.replace({
-        pathname: "/success",
-        params: {
-          fileId: result.file_id,
-          title: trimmedTitle,
-          imagesCount: String(result.images_processed),
-          preview: result.markdown_preview,
-        },
-      });
-    } catch (err) {
-      setError(friendlyError(err));
-    } finally {
-      setLoading(false);
-      setCompressing(false);
-    }
-  }, [title, images, folder, router]);
-
-  const isIdle = !loading && !compressing;
+  const {
+    title,
+    setTitle,
+    images,
+    folder,
+    loading,
+    compressing,
+    error,
+    clearError,
+    remaining,
+    pickAndCompressImage,
+    takePhoto,
+    openCropper,
+    removeImage,
+    handleSubmit,
+    isIdle,
+    router,
+  } = useCreateNote();
 
   return (
     <SafeAreaView style={styles.safe} edges={["bottom"]}>
@@ -172,7 +49,6 @@ export default function CreateScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Error */}
           {error && (
             <ErrorBanner
               message={error}
@@ -181,7 +57,6 @@ export default function CreateScreen() {
             />
           )}
 
-          {/* Title */}
           <View style={styles.section}>
             <SectionLabel>Title</SectionLabel>
             <TextInput
@@ -199,7 +74,6 @@ export default function CreateScreen() {
             />
           </View>
 
-          {/* Folder */}
           <View style={styles.section}>
             <SectionLabel>Save to Folder</SectionLabel>
             <TouchableOpacity
@@ -224,7 +98,6 @@ export default function CreateScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Photos */}
           <View style={styles.section}>
             <View style={styles.photoHeader}>
               <SectionLabel>Photos</SectionLabel>
@@ -240,7 +113,13 @@ export default function CreateScreen() {
 
             <View style={styles.photoGrid}>
               {images.map((img, index) => (
-                <View key={img.originalUri + index} style={styles.photoCell}>
+                <TouchableOpacity
+                  key={img.originalUri + index}
+                  style={styles.photoCell}
+                  onPress={() => {
+                    openCropper(img.originalUri, index);
+                  }}
+                >
                   <Image
                     source={{ uri: img.originalUri }}
                     style={styles.photoThumb}
@@ -252,13 +131,13 @@ export default function CreateScreen() {
                   >
                     <Text style={styles.photoRemoveIcon}>✕</Text>
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               ))}
 
               {remaining > 0 && (
                 <TouchableOpacity
                   style={styles.photoAdd}
-                  onPress={pickFromLibrary}
+                  onPress={pickAndCompressImage}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.photoAddIcon}>＋</Text>
@@ -279,7 +158,6 @@ export default function CreateScreen() {
           </View>
         </ScrollView>
 
-        {/* Submit */}
         <View style={styles.submitBar}>
           <Button
             label={
@@ -446,5 +324,62 @@ const styles = StyleSheet.create({
     fontSize: theme.text.sm,
     color: theme.colors.inkMuted,
     fontStyle: "italic",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.size.lg,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: theme.colors.bg,
+    borderRadius: theme.radius.md,
+    overflow: "hidden",
+  },
+  modalImage: {
+    width: "100%",
+    height: 320,
+    backgroundColor: theme.colors.surfaceAlt,
+  },
+  modalActions: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: "center",
+    borderRightWidth: 1,
+    borderRightColor: theme.colors.border,
+  },
+  modalBtnDanger: {
+    borderRightWidth: 0,
+  },
+  modalBtnText: {
+    fontSize: theme.text.md,
+    fontWeight: "600",
+    color: theme.colors.ink,
+  },
+  modalBtnTextDanger: {
+    color: theme.colors.error,
+  },
+  modalClose: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(28,24,20,0.55)",
+    borderRadius: theme.radius.full,
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalCloseText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
   },
 });

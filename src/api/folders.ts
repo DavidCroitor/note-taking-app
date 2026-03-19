@@ -1,9 +1,5 @@
+import { DriveFolder } from "../types/models";
 import { apiFetch, TIMEOUT_INTERVALS } from "./client";
-
-export interface DriveFolder {
-  id: string;
-  name: string;
-}
 
 interface FoldersResponse {
   folders: DriveFolder[];

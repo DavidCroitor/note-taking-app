@@ -1,24 +1,20 @@
-import { saveLastFolder } from "@/src/api/storage";
+import { saveLastFolder } from "@/src/utils/storage";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { friendlyError } from "../src/api/client";
-import { DriveFolder, getRootFolders, getSubfolders } from "../src/api/folders";
+import { getRootFolders, getSubfolders } from "../src/api/folders";
 import { Button, ErrorBanner } from "../src/components/ui";
 import { theme } from "../src/constants/theme";
-
-interface LevelEntry {
-  folder: DriveFolder | null; // null = root
-  children: DriveFolder[];
-}
+import type { DriveFolder, LevelEntry } from "../src/types/models";
 
 export default function FolderPickerScreen() {
   const router = useRouter();

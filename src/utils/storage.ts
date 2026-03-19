@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DriveFolder } from "./folders";
+import { DriveFolder } from "../types/models";
 
 const FOLDER_KEY = "last_selected_folder";
 

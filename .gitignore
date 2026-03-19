@@ -45,4 +45,7 @@ app-example
 
 .env
 .env.local
+.env.development
+.env.production
+.env.preview
 eas.json
