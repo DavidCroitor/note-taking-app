@@ -1,7 +1,7 @@
 import { selectedFolderRef } from "@/app/folder-picker";
 import { friendlyError } from "@/src/api/client";
 import { createNoteFromImages } from "@/src/api/notes";
-import { MAX_IMAGES } from "@/src/constants/config";
+import { MAX_HEIGHT, MAX_IMAGES, MAX_WIDTH } from "@/src/constants/config";
 import type { DriveFolder, SelectedImage } from "@/src/types/models";
 import { getLastFolder } from "@/src/utils/storage";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -54,8 +54,8 @@ export function useCreateNote() {
         multiple: true,
         maxFiles: remaining,
         mediaType: "photo",
-        compressImageMaxWidth: 1600,
-        compressImageMaxHeight: 1600,
+        compressImageMaxWidth: MAX_WIDTH,
+        compressImageMaxHeight: MAX_HEIGHT,
         compressImageQuality: 0.8,
       });
 

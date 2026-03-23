@@ -26,6 +26,12 @@
         "android.permission.RECORD_AUDIO"
       ]
     },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cc77f865-1321-4517-beca-8eaba18f05a5"
+    },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
