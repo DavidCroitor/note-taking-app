@@ -86,7 +86,6 @@ export function useCreateNote() {
         compressImageQuality: 0.8,
         cropping: true,
         freeStyleCropEnabled: true,
-        hideBottomControls: true,
       });
 
       setImages((prev) =>
@@ -112,7 +111,6 @@ export function useCreateNote() {
         path: imagePath,
         mediaType: "photo",
         freeStyleCropEnabled: true,
-        hideBottomControls: true,
       });
 
       setImages((prev) =>
